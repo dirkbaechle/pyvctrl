@@ -1,0 +1,209 @@
+<vito>
+	<devices>
+		<device ID="209C" name="Vito200" protocol="P300" />
+	</devices>
+
+	<commands>
+
+		<!-- BETRIEBSARTEN -->
+
+		<command name='getVitoBetriebsart' protocmd='getaddr'>
+			<addr>2301</addr>
+			<len>1</len>
+			<unit>BA</unit>
+			<description>Betriebsart</description>
+		</command>
+		<command name='setVitoBetriebsart' protocmd='setaddr'>
+			<addr>2301</addr>
+			<len>1</len>
+			<unit>BA</unit>
+			<description>Setze Betriebsart</description>
+		</command>
+
+		<!-- PARTYBETRIEB -->
+
+		<command name='getVitoBetriebParty' protocmd='getaddr'>
+			<addr>2303</addr>
+			<len>1</len>
+			<unit>RT</unit>
+			<description>Partybetrieb</description>
+		</command>
+		<command name='setVitoBetriebParty' protocmd='setaddr'>
+			<addr>2303</addr>
+			<len>1</len>
+			<unit>RT</unit>
+			<description>Setze Partybetrieb</description>
+		</command>
+		<command name='getVitoTempPartySoll' protocmd='getaddr'>
+			<addr>2308</addr>
+			<len>1</len>
+			<unit>T1U</unit>
+			<description>Solltemperatur Partybetrieb in °C</description>
+		</command>
+		<command name='setVitoTempPartySoll' protocmd='setaddr'>
+			<addr>2308</addr>
+			<len>1</len>
+			<unit>T1U</unit>
+			<description>Setze Warmwassersolltemperatur Partybetrieb in °C</description>
+		</command>
+
+		<!-- SPARBETRIEB -->
+
+		<command name='getVitoBetriebSpar' protocmd='getaddr'>
+			<addr>2302</addr>
+			<len>1</len>
+			<unit>RT</unit>
+			<description>Sparbetrieb</description>
+		</command>
+		<command name='setVitoBetriebSpar' protocmd='setaddr'>
+			<addr>2302</addr>
+			<len>1</len>
+			<unit>RT</unit>
+			<description>Setze Sparbetrieb</description>
+		</command>
+
+		<!-- SOLLTEMPERATUREN -->
+
+		<command name='getVitoTempRaumNorSoll' protocmd='getaddr'>
+			<addr>2306</addr>
+			<len>1</len>
+			<unit>T1U</unit>
+			<description>Raumsolltemperatur Normal in °C</description>
+		</command>
+		<command name='setVitoTempRaumNorSoll' protocmd='setaddr'>
+			<addr>2306</addr>
+			<len>1</len>
+			<unit>T1U</unit>
+			<description>Setze Raumsolltemperatur Normal in °C</description>
+		</command>
+		<command name='getVitoTempRaumRedSoll' protocmd='getaddr'>
+			<addr>2307</addr>
+			<len>1</len>
+			<unit>T1U</unit>
+			<description>Raumsolltemperatur reduzierter Betrieb in °C</description>
+		</command>
+		<command name='setVitoTempRaumRedSoll' protocmd='setaddr'>
+			<addr>2307</addr>
+			<len>1</len>
+			<unit>T1U</unit>
+			<description>Setze Raumsolltemperatur reduzierter Betrieb in °C</description>
+		</command>
+		
+		<!-- AUSSENTEMPERATUR -->
+
+		<command name='getVitoTempAussen' protocmd='getaddr'>
+			<addr>0800</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Außentemperatur in °C</description>
+		</command>
+		
+		<!-- KESSEL / BRENNER -->
+
+		<command name='getVitoTempKesselIst' protocmd='getaddr'>
+			<addr>0810</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Vorlauf- bzw. Kesseltemperatur in °C</description>
+		</command>
+		<command name='getVitoTempKesselSoll' protocmd='getaddr'>
+			<addr>555A</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Kesselsolltemperatur in °C</description>
+		</command>
+		<command name='getVitoStatusFlamme' protocmd='getaddr'>
+			<addr>55DE</addr>
+			<len>1</len>
+			<unit>FLS</unit>
+			<description>Flammenstatus</description>
+		</command>
+		<command name='getVitoLaufzeitBrenner' protocmd='getaddr'>
+			<addr>08A7</addr>
+			<len>4</len>
+			<unit>HS</unit>
+			<description>Brenner Betriebsstunden</description>
+		</command>
+		<command name='getVitoStartsBrenner' protocmd='getaddr'>
+			<addr>088A</addr>
+			<len>4</len>
+			<unit>CO</unit>
+			<description>Brennerstarts</description>
+		</command>
+
+		<!-- HEIZKENNLINIE -->
+
+		<command name='getVitoKennlinieNeigung' protocmd='getaddr'>
+			<addr>2305</addr>
+			<len>1</len>
+			<unit>UN</unit>
+			<description>Neigung Heizkennlinie</description>
+		</command>
+		<command name='setVitoKennlinieNeigung' protocmd='setaddr'>
+			<addr>2305</addr>
+			<len>1</len>
+			<unit>UN</unit>
+			<description>Setze Neigung Heizkennlinie</description>
+		</command>
+		<command name='getVitoKennlinieNiveau' protocmd='getaddr'>
+			<addr>2304</addr>
+			<len>1</len>
+			<unit>ST</unit>
+			<description>Niveau Heizkennlinie</description>
+		</command>
+		<command name='setVitoKennlinieNiveau' protocmd='setaddr'>
+			<addr>2304</addr>
+			<len>1</len>
+			<unit>ST</unit>
+			<description>Setze Niveau Heizkennlinie</description>
+		</command>
+
+		<!-- HEIZKREIS -->
+
+		<command name='getVitoBetriebsartHK' protocmd='getaddr'>
+			<addr>2500</addr>
+			<len>1</len>
+			<unit>ABA</unit>
+			<description>Aktuelle Betriebsart des Heizkreises</description>
+		</command>
+		<command name='getVitoTempVLSoll' protocmd='getaddr'>
+			<addr>2544</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Vorlaufsolltemperatur in °C</description>
+		</command>
+		<command name='getVitoTempRLIst' protocmd='getaddr'>
+			<addr>0818</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Rücklauftemperatur in °C</description>
+		</command>
+		<command name='getVitoStatusPumpeHK' protocmd='getaddr'>
+			<addr>2906</addr>
+			<len>1</len>
+			<unit>RT</unit>
+			<description>Status Heizkreispumpe</description>
+		</command>
+		<command name='getVitoTempRaumHK' protocmd='getaddr'>
+			<addr>0896</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Heizkreis Raumtemperatur in °C</description>
+		</command>
+		<command name='getVitoStatusPumpeZirku' protocmd='getaddr'>
+			<addr>0846</addr>
+			<len>1</len>
+			<unit>RT</unit>
+			<description>Status Zirkulationspumpe</description>
+		</command>
+
+		<!-- GERAETEDATEN -->
+
+		<command name='getVitoAnlagenschema' protocmd='getaddr'>
+			<addr>7700</addr>
+			<len>1</len>
+			<unit>ST</unit>
+			<description>Anlagenschema</description>
+		</command>
+	</commands>
+</vito>
