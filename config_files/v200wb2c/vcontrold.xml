@@ -18,7 +18,7 @@
 			</logging>
       -->
 			<device ID="209C"/>
-				<!-- war vorher 20CB!!! Jetzt Vitotronic 200 KW2
+				<!-- Vitotronic 200 KW2
 
 					Witterungsgeführte Kessel- u. Heizkreisregelung für gleitend
 					abgesenkte Kesselwassertemperatur mit Regelung für 1 Heizkreis
@@ -29,12 +29,17 @@
 	<units>
 		<unit name='Aktuelle Betriebsart'>
 			<abbrev>ABA</abbrev>
+			<!-- Aktuell deaktiviert 
 			<type>enum</type>
 			<enum bytes='00' text='Abschaltbetr. (Dauernd)'/>
 			<enum bytes='01' text='Red. Betrieb (Schaltuhr)'/>
 			<enum bytes='02' text='Normalbetrieb (Schaltuhr)'/>
 			<enum bytes='03' text='Normalbetrieb (Dauernd)'/>
 			<enum text='?'/>
+			-->
+			<calc get='V' set='V'/>
+			<type>char</type>
+			<entity></entity>
 		</unit>
 		<unit name='Betriebsart'>
 			<abbrev>BA</abbrev>
@@ -174,11 +179,16 @@
 			<enum  text='?'/>
 		</unit>
 		<unit name='Flammenstatus'>
+			<!-- Aktuell deaktiviert
 			<abbrev>FLS</abbrev>
 			<type>enum</type>
 			<enum bytes='00' text='aus'/>
 			<enum bytes='0B' text='an'/>
 			<enum text='?'/>
+            -->
+			<calc get='V' set='V'/>
+			<type>char</type>
+			<entity></entity>
 		</unit>
 		<unit name='HKP Pumpentyp'>
 			<abbrev>HKT</abbrev>

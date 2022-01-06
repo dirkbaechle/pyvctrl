@@ -13,8 +13,8 @@ vclient -c getVitoTempKesselSoll
 vclient -c getVitoStatusFlamme
 vclient -c getVitoLaufzeitBrenner
 vclient -c getVitoStartsBrenner
-vclient -c getVitoKennlinieNeigung
-vclient -c getVitoKennlinieNiveau
+vclient -c getVitolaKennlinieNeigung
+vclient -c getVitolaKennlinieNiveau
 vclient -c getVitoBetriebsartHK
 vclient -c getVitoTempVLSoll
 vclient -c getVitoTempRLIst
