@@ -42,7 +42,7 @@ def parseVclientOutput(msg):
 
 def hasServerError(msg):
     """ Return 'True' if the given response message from the
-        vclient contains a '' (server error).
+        vclient contains a 'SRV ERR:' (server error).
     """
 
     if 'SRV ERR:' in msg:
@@ -55,9 +55,8 @@ def listOfGetCommands(glist):
         readily compiled for the readVclientData method.
     """
     clist = []
-    for g in glist:
-        clist.append('-c')
-        clist.append(g)
+    clist.append('-c')
+    clist.append(','.join(glist))
 
     return clist
 
@@ -86,7 +85,9 @@ def listOfSetCommands(sdict):
     return clist
 
 def setVclientData(sdata):
-
+    """ Sends vclient set commands, based on the given dict
+        of data (key/value pairs).
+    """
     stdout = cmd.stdoutCmd(['vclient'] + listOfSetCommands(sdata))
 
     if hasServerError(stdout):
@@ -94,6 +95,17 @@ def setVclientData(sdata):
 
     return True
 
+def vt(rtsoll, at, atged, neigung, niveau):
+    """ Return the VLsoll temp, computed by method 1.
+    """
+    return neigung * 1.8317984 * (rtsoll - (atged*0.7 + at*0.3))**0.8281902 + niveau + rtsoll
+
+def vt2(rtsoll, at, atged, neigung, niveau):
+    """ Return the VLsoll temp, computed by method 2.
+    """
+    mixedat = (atged*0.7 + at*0.3)
+    dar = mixedat - rtsoll
+    return niveau + rtsoll - neigung * dar * (1.4347 + 0.021 * dar + 247.9 * 10**-6 * dar * dar)
 
 if __name__ == "__main__":
     print(listOfGetCommands(['getNiveau', 'getNeigung']))

@@ -134,51 +134,25 @@
 		<!-- HEIZKENNLINIE -->
 
 		<command name='getVitoKennlinieNeigung' protocmd='getaddr'>
-			<addr>2305</addr>
+			<addr>37D3</addr>
 			<len>1</len>
 			<unit>UN</unit>
 			<description>Neigung Heizkennlinie</description>
 		</command>
 		<command name='setVitoKennlinieNeigung' protocmd='setaddr'>
-			<addr>2305</addr>
+			<addr>37D3</addr>
 			<len>1</len>
 			<unit>UN</unit>
 			<description>Setze Neigung Heizkennlinie</description>
 		</command>
 		<command name='getVitoKennlinieNiveau' protocmd='getaddr'>
-			<addr>2304</addr>
+			<addr>37D4</addr>
 			<len>1</len>
 			<unit>ST</unit>
 			<description>Niveau Heizkennlinie</description>
 		</command>
 		<command name='setVitoKennlinieNiveau' protocmd='setaddr'>
-			<addr>2304</addr>
-			<len>1</len>
-			<unit>ST</unit>
-			<description>Setze Niveau Heizkennlinie</description>
-		</command>
-
-		<!-- Test for the correct addresses of Neigung/Niveau -->
-		<command name='getVitolaKennlinieNeigung' protocmd='getaddr'>
-			<addr>27D3</addr>
-			<len>1</len>
-			<unit>UN</unit>
-			<description>Neigung Heizkennlinie</description>
-		</command>
-		<command name='setVitolaKennlinieNeigung' protocmd='setaddr'>
-			<addr>27D3</addr>
-			<len>1</len>
-			<unit>UN</unit>
-			<description>Setze Neigung Heizkennlinie</description>
-		</command>
-		<command name='getVitolaKennlinieNiveau' protocmd='getaddr'>
-			<addr>27D4</addr>
-			<len>1</len>
-			<unit>ST</unit>
-			<description>Niveau Heizkennlinie</description>
-		</command>
-		<command name='setVitolaKennlinieNiveau' protocmd='setaddr'>
-			<addr>27D4</addr>
+			<addr>37D4</addr>
 			<len>1</len>
 			<unit>ST</unit>
 			<description>Setze Niveau Heizkennlinie</description>
@@ -187,7 +161,7 @@
 		<!-- HEIZKREIS -->
 
 		<command name='getVitoBetriebsartHK' protocmd='getaddr'>
-			<addr>2500</addr>
+			<addr>3500</addr>
 			<len>1</len>
 			<unit>ABA</unit>
 			<description>Aktuelle Betriebsart des Heizkreises</description>
