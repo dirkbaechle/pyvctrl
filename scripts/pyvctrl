@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 
+# Disclaimer: Please regard that the following implementation supports only
+#             the special installation of a Vitodens200 at my home. I have
+#             replaced the external temperature sensor with a 22k resistor,
+#             resulting in a fixed external temperature of 8C!
+
 import sys
-import os
+import time
+import datetime
 import pyvctrl
 
 
@@ -14,10 +20,322 @@ Usage:
 
 where options are:
 
-  -l : Logging mode, simply output the current available parameters to stdout every 5s
+  -l : Logging mode, output the currently available parameters to stdout on every read
 
 """)
 
+# Set to 'False' for operational service, this will
+# enable the actual setting/resetting of the heating
+# curve parameters...
+debug_mode = True
+
+print_info = True
+
+print_data = True
+
+# Fixed external temperature (see disclaimer above!)
+external_temperature = 8.0
+# Fixed room temperature (see disclaimer above!)
+room_temperature = 23.0
+
+# VLsoll default value
+VLDEFAULT = 65.0
+
+# VLsoll values for the single months 1-12 (Jan-Dec)
+target_vl = {1 : VLDEFAULT,
+             2 : VLDEFAULT,
+             3 : VLDEFAULT,
+             4 : VLDEFAULT,
+             5 : VLDEFAULT,
+             6 : VLDEFAULT,
+             7 : VLDEFAULT,
+             8 : VLDEFAULT,
+             9 : VLDEFAULT,
+             10 : VLDEFAULT,
+             11 : VLDEFAULT,
+             12 : VLDEFAULT
+            }
+
+# The values that should get requested via vclient continuously.
+logged_values = ['getVitoTempAussen',
+                 'getVitoTempKesselIst',
+                 'getVitoTempKesselSoll',
+                 'getVitoStatusFlamme',
+                 'getVitoLaufzeitBrenner',
+                 'getVitoStartsBrenner',
+                 'getVitoKennlinieNeigung',
+                 'getVitoKennlinieNiveau',
+                 'getVitoTempVLSoll',
+                 'getVitoTempRLIst',
+                 'getVitoTempRaumHK']
+
+# The "probe" command that gets used to check whether the connection
+# to the Vito* is alive (again).
+probe_commands = ['getVitoStatusFlamme']
+
+# Maximal niveau values: -13 - 40
+niveau_interval = ['24.0', '34.0']
+# Maximal slope values: 0.2 - 3.5
+slope_interval = ['0.2', '0.4']
+# Slope value for marking an increased VLsoll
+slope_high = '0.7'
+
+last_slope = '0.3'
+
+def printInfo(info):
+    """ Simple wrapper for printing info messages.
+    """
+    if print_info:
+        print(info)
+
+def printData(data):
+    """ Simple wrapper for printing data messages.
+    """
+    if print_data:
+        print(data)
+
+def vitoIsConnected():
+    """ Returns True if we can reach the Vito and communication
+        seems to be possible.
+    """
+    data = pyvctrl.readVclientData(probe_commands)
+    if not data:
+        return False
+
+    return True
+
+def heatingValuesArePermissible(slope, niveau):
+    """ Checks whether the heating curve params are in a
+        good range by checking the resulting VLsoll.
+    """
+    if slope >= 0.7:
+        return False
+    vt = pyvctrl.vt(room_temperature, external_temperature, external_temperature, slope, niveau)
+    if vt > 45.0 and vt < 77.0:
+        return True
+    return False
+
+def getVLForMonth():
+    tt = datetime.datetime.now()
+    return target_vl[tt.month]
+
+def findNiveauForVLTemp(slope, vl):
+    """ Loop over the vt values until we find a niveau,
+        such that the resulting VLsoll is at least vl.
+    """
+    niveau = -13
+
+    while (niveau < 40):
+        vt = pyvctrl.vt(room_temperature, external_temperature, external_temperature, slope, niveau)
+        if vt > vl:
+            break
+
+    return niveau
+
+def initNiveau():
+    """ Ensure that the heating niveau initially is in a sane
+        interval, and set the slope of the heating function
+        to the configured marker value.
+    """
+
+    current = pyvctrl.readVclientData(['getVitoKennlinieNeigung',
+                                       'getVitoKennlinieNiveau'])
+    if not current:
+        return False
+
+    try:
+        niveau = int(current['getVitoKennlinienNiveau'])
+        slope = float(current['getVitoKennlinieNeigung'])
+
+        # TODO Compare values against interval and reset if necessary...
+
+        if not debug_mode:
+            pass
+
+    except:
+        return False
+
+    return True
+
+def increaseNiveau(data):
+    """ Raise the heating niveau, such that the burner isn't shut
+        off immediately.
+        Set the slope of the heating function
+        to the configured "slope_high" marker value.
+    """
+    global last_slope
+    if not data:
+        return False
+
+    try:
+        niveau = int(data['getVitoKennlinieNiveau'])
+        slope = float(data['getVitoKennlinieNeigung'])
+    except:
+        return False
+
+    # Store current slope value
+    last_slope = slope
+    # TODO Compare values against interval and reset if necessary...
+
+    # Mark slope as having been "touched" (= changed by the script)
+    slope = 0.7
+    # Add 4k to heating niveau
+    niveau += 4
+
+    # Check whether new values are also within a permissible range
+    if not heatingValuesArePermissible(slope, niveau):
+        return False
+
+    # TODO Try to set new values
+    if not debug_mode:
+        pass
+
+    return True
+
+def decreaseNiveau(data):
+    """ Ensure that the heating niveau initially is in a sane
+        interval, and set the slope of the heating function
+        to the configured value.
+    """
+    if not data:
+        return False
+
+    niveau = data['getVitoKennlinieNiveau']
+    slope = data['getVitoKennlinieNeigung']
+
+    # TODO Compare values against interval and reset if necessary...
+    if not debug_mode:
+        pass
+
+    return False
+
+
+
+def dataLine(data):
+    line = ""
+    # Format current date and time
+    tnow = datetime.datetime.now()
+    line += tnow.isoformat()
+    # Add the actual values
+    for key in logged_values:
+        line += ", %s" % data[key]
+
+    return line
+
+def dataHeader(data):
+    line = ""
+    line += "Time"
+    # Add the actual values
+    for key in logged_values:
+        line += ", %s" % key
+
+    return line
+
+
+def logData(data, fpath):
+    with open(fpath, "w+") as fout:
+        fout.write(dataLine(data))
+        fout.write("\n")
+
+
+def vitoData():
+    return pyvctrl.readVclientData(logged_values)
+
+# No connection to the Vitodens
+MVOID = 0
+# Waiting for the flame to turn on
+MFLWAIT = 1
+# Flame is on, waiting ~5s to correct niveau
+MNVWAIT = 2
+# Flame on, niveau corrected, waiting until burn-in complete
+MBURNIN = 3
+# Waiting for the flame to turn off
+MHEAT = 4
+
+# Wait 1 cycle (= 5s) before raising the heating niveaus
+# after the flame was detected to be switched on
+nvmax = 1
+# Wait 12 cycles (= 60s) for the burnin phase to complete,
+# after this time the heating niveaus will be lowered again
+# back to their original values.
+burninmax = 12
+
+def vito_monitor(logging, watching, fpath):
+    """ First simple version of our main loop, which is only able to
+        log the current values.
+    """
+    data = {}
+    mode = MVOID
+    nvwait = 0
+    burninwait = 0
+
+    while 1:
+        if mode == MVOID:
+            # Try to reach Vito via vclient
+            if vitoIsConnected():
+                mode = MFLWAIT
+                printInfo("Mode MFLWAIT")
+                if watching:
+                    # Try to init heating niveau again
+                    if not initNiveau():
+                        # Assume that the connection is lost
+                        mode = MVOID
+        else:
+            # Try to read data values
+            data = vitoData()
+            if not data:
+                # Fall back to error/void mode
+                mode = MVOID
+            else:
+                # Print data
+                printData(dataLine(data))
+                # Log data
+                if logging:
+                    logData(data, fpath)
+
+                # Handle process state (and transitions)
+                if mode == MFLWAIT:
+                    # Check flame status
+                    if ('getVitoStatusFlamme' in data and 
+                        data['getVitoStatusFlamme'] == "an"):
+                        mode = MNVWAIT
+                        nvwait = 0
+                        printInfo("Mode MNVWAIT")
+                elif mode == MNVWAIT:
+                    # TODO Take into account that the flame could die
+                    # in the meantime -> check flame status and switch back to MFLWAIT!
+                    nvwait += 1
+                    if nvwait == nvmax:
+                        mode = MBURNIN
+                        printInfo("Mode MBURNIN")
+                        burninwait = 0
+                        if watching:
+                            # Try to increase heating niveau
+                            if not increaseNiveau(data):
+                                # Assume that the connection is lost
+                                mode = MVOID
+                                printInfo("Mode MVOID")
+                elif mode == MBURNIN:
+                    # TODO Take into account that the flame could die
+                    # in the meantime -> check flame status and switch back to MFLWAIT!
+                    burninwait += 1
+                    if burninwait == burninmax:
+                        mode = MHEAT
+                        printInfo("Mode MHEAT")
+                        if watching:
+                            # Try to decrease heating niveau again
+                            if not decreaseNiveau(data):
+                                # Assume that the connection is lost
+                                mode = MVOID
+                                printInfo("Mode MVOID")
+                elif mode == MHEAT:
+                    # Check flame status
+                    if ('getVitoStatusFlamme' in data and 
+                        data['getVitoStatusFlamme'] == "aus"):
+                        mode = MFLWAIT
+                        printInfo("Mode MFLWAIT")
+
+        time.sleep(5)
 
 def main():
     # Process command line arguments
@@ -25,20 +343,24 @@ def main():
         usage()
         sys.exit(0)
 
-    LOGMODE = False
+    logmode = False
+    watchmode = False
+    fpath = "pyvctrl.log"
 
     for arg in sys.argv[1:]:
         if arg in ["-h","-?","--help"]:
             usage()
             sys.exit(0)
 
-        if arg in ["-l","--logging","--logging-mode"]:
-            LOGMODE = True
+        elif arg in ["-l","--logging","--logging-mode"]:
+            logmode = True
+        elif arg in ["-w","--watch","--watch-mode"]:
+            watchmode = True
+        else:
+            fpath = arg
 
-    if LOGMODE:
-        pass
-    else:
-        pass
+    # Start watching/logging
+    vito_monitor(logmode, watchmode, fpath)
 
 
 if __name__ == "__main__":

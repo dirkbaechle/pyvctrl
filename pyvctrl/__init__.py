@@ -116,6 +116,7 @@ def vt2(rtsoll, at, atged, neigung, niveau):
     return niveau + rtsoll - neigung * dar * (1.4347 + 0.021 * dar + 247.9 * 10**-6 * dar * dar)
 
 if __name__ == "__main__":
+    print(listOfGetCommands(['getVitoFlammenStatus']))
     print(listOfGetCommands(['getNiveau', 'getNeigung']))
     print(listOfSetCommands({'setNiveau': '30.0', 'setNeigung': '2.0'}))
     msg = """getVitoBetriebsart:
