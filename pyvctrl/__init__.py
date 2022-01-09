@@ -19,10 +19,14 @@ def parseVclientOutput(msg):
     value = None
 
     for m in ml:
+        # Simplify string to one space only between tokens
         m = ' '.join(m.split())
+        # Is this line supposed to be a key or a value?
         if mode == MKEY:
+            # A key
             key = m.rstrip(':')
         else:
+            # A value
             if '.' in m:
                 # Seems to be an int/float value, so get rid of the
                 # appended unit in the string
@@ -31,6 +35,10 @@ def parseVclientOutput(msg):
                     value = sl[0]
                 else:
                     value = m
+
+                # Also reduce trailing zeros
+                while value.endswith('00'):
+                    value = value[:-1]
             else:
                 value = m
             data[key] = value
