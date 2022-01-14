@@ -1,6 +1,6 @@
 <vito>
 	<devices>
-		<device ID="209C" name="Vito200" protocol="P300" />
+		<device ID="20CB" name="Vito200" protocol="P300" />
 	</devices>
 
 	<commands>
@@ -97,7 +97,25 @@
 			<unit>TD</unit>
 			<description>Außentemperatur in °C</description>
 		</command>
-		
+		<command name="getVitoTempAussenTp" protocmd="getaddr">
+			<addr>5525</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Außentemperatur in °C (Tiefpass)</description>
+		</command>
+		<command name="getVitoTempAussenAged" protocmd="getaddr">
+			<addr>5523</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Außentemperatur in °C (Gedaempft)</description>
+		</command>
+		<command name="getVitoTempAussenMid" protocmd="getaddr">
+			<addr>5527</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Außentemperatur in °C (Gemittelt)</description>
+		</command>
+
 		<!-- KESSEL / BRENNER -->
 
 		<command name='getVitoTempKesselIst' protocmd='getaddr'>
@@ -105,6 +123,12 @@
 			<len>2</len>
 			<unit>TD</unit>
 			<description>Vorlauf- bzw. Kesseltemperatur in °C</description>
+		</command>
+		<command name='getVitoTempSpeicher' protocmd='getaddr'>
+			<addr>0812</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Speichertemperatur in °C</description>
 		</command>
 		<command name='getVitoTempKesselSoll' protocmd='getaddr'>
 			<addr>555A</addr>
@@ -158,7 +182,7 @@
 			<description>Setze Niveau Heizkennlinie</description>
 		</command>
 
-		<!-- HEIZKREIS -->
+		<!-- HEIZKREIS HK2/M2 -->
 
 		<command name='getVitoBetriebsartHK' protocmd='getaddr'>
 			<addr>3500</addr>
@@ -167,10 +191,22 @@
 			<description>Aktuelle Betriebsart des Heizkreises</description>
 		</command>
 		<command name='getVitoTempVLSoll' protocmd='getaddr'>
-			<addr>2544</addr>
+			<addr>3544</addr>
 			<len>2</len>
 			<unit>TD</unit>
 			<description>Vorlaufsolltemperatur in °C</description>
+		</command>
+		<command name="getVitoTempVL" protocmd="getaddr">
+			<addr>3900</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Vorlauftemperatur in °C</description>
+		</command>
+		<command name="getVitoTempRL17A" protocmd="getaddr">
+			<addr>0808</addr>
+			<len>2</len>
+			<unit>TD</unit>
+			<description>Ruecklauftemperatur 17A in °C</description>
 		</command>
 		<command name='getVitoTempRLIst' protocmd='getaddr'>
 			<addr>0818</addr>
@@ -197,6 +233,14 @@
 			<description>Status Zirkulationspumpe</description>
 		</command>
 
+		<!-- STOERUNG -->
+		<command name="getVitoStatusStoerung" protocmd="getaddr">
+			<addr>0A82</addr>
+			<len>1</len>
+			<unit>STU</unit>
+			<description>Status Sammelstoerung</description>
+		</command>
+
 		<!-- GERAETEDATEN -->
 
 		<command name='getVitoAnlagenschema' protocmd='getaddr'>
@@ -205,5 +249,36 @@
 			<unit>ST</unit>
 			<description>Anlagenschema</description>
 		</command>
+		<command name="getVitoDevType" protocmd="getaddr">
+			<addr>00F8</addr>
+			<len>8</len>
+			<unit>DT</unit>
+			<description>Device Typ der Anlage / SystemIdent_SX</description>
+		</command>
+		<command name="getVitoCtrlId" protocmd="getaddr">
+			<addr>00F9</addr>
+			<len>7</len>
+			<unit>DT</unit>
+			<description>Reglerkennung</description>
+		</command>
+		<command name="getVitoInventory" protocmd="getaddr">
+			<addr>08E0</addr>
+			<len>7</len>
+			<unit>SN</unit>
+			<description>Sachnummer</description>
+		</command>
+		<command name="getVitoInvCodePlug" protocmd="getaddr">
+			<addr>1010</addr>
+			<len>7</len>
+			<unit>SN</unit>
+			<description>Sachnummer Codierstecker</description>
+		</command>
+		<command name="getVitoPanelSWIndex" protocmd="getaddr">
+			<addr>7330</addr>
+			<len>8</len>
+			<unit>DT</unit>
+			<description>Bedienteil SW Index</description>
+		</command>
+  
 	</commands>
 </vito>

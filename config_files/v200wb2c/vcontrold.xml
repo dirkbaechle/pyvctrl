@@ -17,7 +17,7 @@
 				<debug>y</debug>
 			</logging>
       -->
-			<device ID="209C"/>
+			<device ID="20CB"/>
 				<!-- Vitotronic 200 KW2, using HK2
 
 					Witterungsgeführte Kessel- u. Heizkreisregelung für gleitend
@@ -81,7 +81,10 @@
 		<unit name='Systemkennung'>
 			<abbrev>DT</abbrev>
 			<type>enum</type>
-			<enum bytes='20 CB 00 2B 00 00 01 14' text='VScotHO1, ID: 20CB, Protokoll: KW2/P300'/>
+			<enum bytes='20 CB' text='VScotHO1, ID: 20CB, Protokoll: KW2/P300'/>
+			<enum bytes="20 53" text="V200WB2 ID=2053 Protokoll:GWG_VBEM"/>
+			<enum bytes="20 98" text="V200KW2 ID=2098 Protokoll:KW"/>
+			<enum bytes="20 94" text="V200KW1 ID=2094 Protokoll:KW"/>
 			<enum text='?'/>
 		</unit>
 		<unit name='Fehlermeldung'>
@@ -226,6 +229,7 @@
 			<type>enum</type>
 			<enum bytes='00' text='aus'/>
 			<enum bytes='01' text='an'/>
+			<enum bytes='03' text='nacht'/>
 			<enum text='?'/>
 		</unit>
 		<unit name='Sachnummer'>
@@ -244,6 +248,12 @@
 			<abbrev>ST</abbrev>
 			<calc get='V' set='V'/>
 			<type>char</type>
+			<entity></entity>
+		</unit>
+		<unit name='StatusUchar'>
+			<abbrev>STU</abbrev>
+			<calc get='V' set='V'/>
+			<type>uchar</type>
 			<entity></entity>
 		</unit>
 		<unit name='Systemzeit'>

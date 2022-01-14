@@ -3,7 +3,7 @@ import sys
 def vitoXmlHeader():
     return """<vito>
 	<devices>
-		<device ID="209C" name="Vito200" protocol="P300" />
+		<device ID="20CB" name="Vito200" protocol="P300" />
 	</devices>
 
 	<commands>"""

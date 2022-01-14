@@ -22,6 +22,8 @@ def Cmd(cmdlist):
     process = subprocess.Popen(cmdlist, shell=False, stdout=subprocess.PIPE)
     stdout, stderr = process.communicate()
 
+    return stdout, stderr
+
 def stdoutShell(cmd, suppress_stderr=False):
     """ Call given command with the added arguments, if any and return stdout. """
     if suppress_stderr:
@@ -43,3 +45,5 @@ def Shell(cmd):
     """ Call given command with the added arguments, if any. """
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     stdout, stderr = process.communicate()
+
+    return stdout, stderr

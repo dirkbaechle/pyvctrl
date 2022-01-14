@@ -48,12 +48,15 @@ def parseVclientOutput(msg):
 
     return data
 
-def hasServerError(msg):
-    """ Return 'True' if the given response message from the
+def hasServerError(msg, errmsg):
+    """ Return 'True' if one of the given response messages from the
         vclient contains a 'SRV ERR:' (server error).
     """
 
-    if 'SRV ERR:' in msg:
+    if not msg or 'SRV ERR:' in msg:
+        return True
+
+    if errmsg and 'SRV ERR:' in errmsg:
         return True
 
     return False
@@ -73,9 +76,9 @@ def readVclientData(rdata):
         of vclient get commands.
     """
 
-    stdout = cmd.stdoutCmd(['vclient'] + listOfGetCommands(rdata))
+    stdout, stderr = cmd.Cmd(['vclient'] + listOfGetCommands(rdata))
 
-    if hasServerError(stdout):
+    if hasServerError(stdout, stderr):
         return {}
 
     return parseVclientOutput(stdout)
@@ -85,10 +88,12 @@ def listOfSetCommands(sdict):
         readily compiled for the setVclientData method.
     """
     clist = []
+    cmds = []
     for key, value in sdict.iteritems():
-        clist.append('-c')
-        clist.append(key)
-        clist.append('"%s"' % value)
+        cmds.append("%s %s" % (key, value))
+
+    clist.append('-c')
+    clist.append('"%s"' % ','.join(cmds))
 
     return clist
 
@@ -96,9 +101,9 @@ def setVclientData(sdata):
     """ Sends vclient set commands, based on the given dict
         of data (key/value pairs).
     """
-    stdout = cmd.stdoutCmd(['vclient'] + listOfSetCommands(sdata))
+    stdout, stderr = cmd.Cmd(['vclient'] + listOfSetCommands(sdata))
 
-    if hasServerError(stdout):
+    if hasServerError(stdout, stderr):
         return False
 
     return True
