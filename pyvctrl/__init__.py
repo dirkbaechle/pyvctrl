@@ -53,10 +53,10 @@ def hasServerError(msg, errmsg):
         vclient contains a 'SRV ERR:' (server error).
     """
 
-    if not msg or 'SRV ERR:' in msg:
+    if not msg or 'SRV ERR:' in msg.decode():
         return True
 
-    if errmsg and 'SRV ERR:' in errmsg:
+    if errmsg and 'SRV ERR:' in errmsg.decode():
         return True
 
     return False
@@ -81,7 +81,7 @@ def readVclientData(rdata):
     if hasServerError(stdout, stderr):
         return {}
 
-    return parseVclientOutput(stdout)
+    return parseVclientOutput(stdout.decode())
 
 def listOfSetCommands(sdict):
     """ Returns a list of vclient command line options,
