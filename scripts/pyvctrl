@@ -98,7 +98,7 @@ def vitoIsConnected():
     """ Returns True if we can reach the Vito and communication
         seems to be possible.
     """
-    data = pyvctrl.readVclientData(probe_commands)
+    data = pyvctrl.readVclientData(probe_commands, logged_values)
     if not data:
         return False
 
@@ -301,7 +301,7 @@ def initLogFile(fpath):
             fout.write("\n")
 
 def vitoData():
-    return pyvctrl.readVclientData(logged_values)
+    return pyvctrl.readVclientData(logged_values, logged_values)
 
 # No connection to the Vitodens
 MVOID = 0

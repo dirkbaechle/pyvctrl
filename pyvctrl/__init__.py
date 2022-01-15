@@ -1,10 +1,27 @@
 # -*- coding: utf-8 -*-
 import pyvctrl.cmd as cmd
 
-MKEY = 0
-MVALUE = 1
+MVOID = 0
+MKEY = 1
+MVALUE = 2
 
-def parseVclientOutput(msg):
+def reduceFloatValue(m):
+    """ Seems to be an int/float value, so get rid of the
+        appended unit in the string.
+    """
+    sl = m.split()
+    if len(sl) == 2:
+        value = sl[0]
+    else:
+        value = m
+
+    # Also reduce trailing zeros
+    while value.endswith('00'):
+        value = value[:-1]
+
+    return value
+
+def parseVclientOutput(msg, allowed_keys=None):
     """ Parses the given stdout message from vclient and returns
         a dict with the key/value pairs of the result.
         Assumes that hasServeError was called before and no
@@ -15,36 +32,67 @@ def parseVclientOutput(msg):
     ml = msg.split('\n')
 
     mode = MKEY
+    # When explicit keys are defined, start in void mode
+    if allowed_keys:
+        mode = MVOID
     key = None
     value = None
 
     for m in ml:
         # Simplify string to one space only between tokens
         m = ' '.join(m.split())
-        # Is this line supposed to be a key or a value?
-        if mode == MKEY:
-            # A key
-            key = m.rstrip(':')
-        else:
-            # A value
-            if '.' in m:
-                # Seems to be an int/float value, so get rid of the
-                # appended unit in the string
-                sl = m.split()
-                if len(sl) == 2:
-                    value = sl[0]
+
+        if allowed_keys is None:
+            # Is this line supposed to be a key or a value?
+            if mode == MKEY:
+                # A key
+                key = m.rstrip(':')
+            else:
+                # A value
+                if '.' in m:
+                    value = reduceFloatValue(m)
                 else:
                     value = m
+                data[key] = value
 
-                # Also reduce trailing zeros
-                while value.endswith('00'):
-                    value = value[:-1]
+            # Toggle parsing mode
+            mode = 1 - mode
+        else:
+            # Intelligent comparing against the allowed keys
+
+            ckey = m.rstrip(':')
+            is_allowed = ckey in allowed_keys
+            # Is this line supposed to be a key or a value?
+            if mode == MVOID:
+                # Might be a key
+                if is_allowed:
+                    mode = MVALUE
+                    key = ckey
+            elif mode == MKEY:
+                # A key
+                if not is_allowed:
+                    mode = MVOID
+                else:
+                    mode = MVALUE
+                    key = ckey
             else:
-                value = m
-            data[key] = value
-
-        # Toggle parsing mode
-        mode = 1 - mode
+                # Might be another key
+                if not m.endswith(':') and not is_allowed:
+                    # A value
+                    if '.' in m:
+                        value = reduceFloatValue(m)
+                    else:
+                        value = m
+                    data[key] = value
+                    mode = MKEY
+                else:
+                    # We seem to have encountered a key,
+                    # check whether it's allowed...
+                    if not is_allowed:
+                        mode = MVOID
+                    else:
+                        mode = MVALUE
+                        key = ckey
 
     return data
 
@@ -71,7 +119,7 @@ def listOfGetCommands(glist):
 
     return clist
 
-def readVclientData(rdata):
+def readVclientData(rdata, allowed_keys=None):
     """ Returns a dict of data for the given list
         of vclient get commands.
     """
@@ -81,7 +129,7 @@ def readVclientData(rdata):
     if hasServerError(stdout, stderr):
         return {}
 
-    return parseVclientOutput(stdout.decode())
+    return parseVclientOutput(stdout.decode(), allowed_keys)
 
 def listOfSetCommands(sdict):
     """ Returns a list of vclient command line options,
@@ -89,7 +137,7 @@ def listOfSetCommands(sdict):
     """
     clist = []
     cmds = []
-    for key, value in sdict.iteritems():
+    for key, value in sdict.items():
         cmds.append("%s %s" % (key, value))
 
     clist.append('-c')
@@ -119,50 +167,3 @@ def vt2(rtsoll, at, atged, neigung, niveau):
     mixedat = (atged*0.7 + at*0.3)
     dar = mixedat - rtsoll
     return niveau + rtsoll - neigung * dar * (1.4347 + 0.021 * dar + 247.9 * 10**-6 * dar * dar)
-
-if __name__ == "__main__":
-    print(listOfGetCommands(['getVitoFlammenStatus']))
-    print(listOfGetCommands(['getNiveau', 'getNeigung']))
-    print(listOfSetCommands({'setNiveau': '30.0', 'setNeigung': '2.0'}))
-    msg = """getVitoBetriebsart:
-Dauernd Normalbetrieb
-getVitoBetriebParty:
-aus
-getVitoTempPartySoll:
-20.000000 °C
-getVitoBetriebSpar:
-aus
-getVitoTempRaumNorSoll:
-23.000000 °C
-getVitoTempRaumRedSoll:
-3.000000 °C
-getVitoTempAussen:
-7.800000 °C
-getVitoTempKesselIst:
-63.500000 °C
-getVitoTempKesselSoll:
-74.300003 °C
-getVitoStatusFlamme:
-aus
-getVitoLaufzeitBrenner:
-13926.977539 Stunden
-getVitoStartsBrenner:
-252701.000000 
-getVitoKennlinieNeigung:
-2.000000 
-getVitoBetriebsartHK:
-?
-getVitoTempVLSoll:
-0.000000 °C
-getVitoTempRLIst:
-55.099998 °C
-getVitoStatusPumpeHK:
-aus
-getVitoTempRaumHK:
-20.000000 °C
-getVitoStatusPumpeZirku:
-aus
-getVitoAnlagenschema:
-3.000000 
-"""
-    print(parseVclientOutput(msg))
