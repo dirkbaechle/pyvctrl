@@ -21,20 +21,14 @@ def reduceFloatValue(m):
 
     return value
 
-def parseVclientOutput(msg, allowed_keys=None):
-    """ Parses the given stdout message from vclient and returns
-        a dict with the key/value pairs of the result.
-        Assumes that hasServeError was called before and no
-        read error has occured.
+def parseOutputWithoutErrors(ml):
+    """ Parses the given vclient output, while assuming that no
+        errors occured. This means that this function assumes that
+        there will only be key and value lines, and that on each
+        key line a value will follow.
     """
     data = {}
-
-    ml = msg.split('\n')
-
     mode = MKEY
-    # When explicit keys are defined, start in void mode
-    if allowed_keys:
-        mode = MVOID
     key = None
     value = None
 
@@ -42,59 +36,90 @@ def parseVclientOutput(msg, allowed_keys=None):
         # Simplify string to one space only between tokens
         m = ' '.join(m.split())
 
-        if allowed_keys is None:
-            # Is this line supposed to be a key or a value?
-            if mode == MKEY:
-                # A key
-                key = m.rstrip(':')
+        # Is this line supposed to be a key or a value?
+        if mode == MKEY:
+            # A key
+            key = m.rstrip(':')
+        else:
+            # A value
+            if '.' in m:
+                value = reduceFloatValue(m)
             else:
+                value = m
+            data[key] = value
+
+        # Toggle parsing mode
+        mode = 1 - mode
+
+    return data
+
+
+def parseOutputForAllowedKeys(ml, allowed_keys=None):
+    """ Parses the given vclient output, while accepting only
+        known (or allowed) keys.
+        Also handles void states, where line occur that are neither
+        a key nor a value.
+    """
+    data = {}
+    # When explicit keys are defined, start in void mode
+    mode = MVOID
+    key = None
+    value = None
+
+    for m in ml:
+        # Simplify string to one space only between tokens
+        m = ' '.join(m.split())
+
+        # Intelligent comparing against the allowed keys
+        ckey = m.rstrip(':')
+        is_allowed = ckey in allowed_keys
+        # Is this line supposed to be a key or a value?
+        if mode == MVOID:
+            # Might be a key
+            if is_allowed:
+                mode = MVALUE
+                key = ckey
+        elif mode == MKEY:
+            # A key
+            if not is_allowed:
+                mode = MVOID
+            else:
+                mode = MVALUE
+                key = ckey
+        else:
+            # Might be another key
+            if not m.endswith(':') and not is_allowed:
                 # A value
                 if '.' in m:
                     value = reduceFloatValue(m)
                 else:
                     value = m
                 data[key] = value
-
-            # Toggle parsing mode
-            mode = 1 - mode
-        else:
-            # Intelligent comparing against the allowed keys
-
-            ckey = m.rstrip(':')
-            is_allowed = ckey in allowed_keys
-            # Is this line supposed to be a key or a value?
-            if mode == MVOID:
-                # Might be a key
-                if is_allowed:
-                    mode = MVALUE
-                    key = ckey
-            elif mode == MKEY:
-                # A key
+                mode = MKEY
+            else:
+                # We seem to have encountered a key,
+                # check whether it's allowed...
                 if not is_allowed:
                     mode = MVOID
                 else:
                     mode = MVALUE
                     key = ckey
-            else:
-                # Might be another key
-                if not m.endswith(':') and not is_allowed:
-                    # A value
-                    if '.' in m:
-                        value = reduceFloatValue(m)
-                    else:
-                        value = m
-                    data[key] = value
-                    mode = MKEY
-                else:
-                    # We seem to have encountered a key,
-                    # check whether it's allowed...
-                    if not is_allowed:
-                        mode = MVOID
-                    else:
-                        mode = MVALUE
-                        key = ckey
 
     return data
+
+
+def parseVclientOutput(msg, allowed_keys=None):
+    """ Parses the given stdout message from vclient and returns
+        a dict with the key/value pairs of the result.
+        Assumes that hasServeError was called before and no
+        read error has occured.
+    """
+    ml = msg.split('\n')
+
+    if allowed_keys is None:
+        return parseOutputWithoutErrors(ml)
+    else:
+        return parseOutputForAllowedKeys(ml, allowed_keys)
 
 def hasServerError(msg, errmsg):
     """ Return 'True' if one of the given response messages from the
