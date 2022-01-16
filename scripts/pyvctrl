@@ -11,13 +11,6 @@ import time
 import datetime
 import pyvctrl
 
-#
-# Evaluation of data values in LibreCalc...
-#
-#  =WENN(IDENTISCH(B2;"an");1;0)
-#
-
-
 # Set to 'False' for operational service, this will
 # enable the actual setting/resetting of the heating
 # curve parameters...
@@ -28,7 +21,6 @@ debug_mode = False
 allow_init = False
 
 print_info = True
-
 print_data = True
 
 # Fixed external temperature (see disclaimer above!)
@@ -339,7 +331,8 @@ class VitoMonitor():
         self.burninmax = 12
 
     def processFlameInitMode(self, data) -> int:
-        # Check flame status, wait until off
+        """ Check flame status, wait until off.
+        """
         if ('getVitoStatusFlamme' in data and 
             data['getVitoStatusFlamme'] == "aus"):
             self.mode = MFLWAIT
@@ -352,7 +345,8 @@ class VitoMonitor():
                     printInfo("Mode MFLWAIT")
 
     def processFlameWaitMode(self, data) -> int:
-        # Check flame status, wait until on
+        """ Check flame status, wait until on.
+        """
         if ('getVitoStatusFlamme' in data and 
             data['getVitoStatusFlamme'] == "an"):
             self.mode = MNVWAIT
@@ -360,6 +354,9 @@ class VitoMonitor():
             printInfo("Mode MNVWAIT")
 
     def processIgnitionPhase(self, data):
+        """ Flame is on, wait configured number of cycles and
+            then increase the heating niveau.
+        """
         # Take into account that the flame could die
         # in the meantime -> check flame status and switch back to MFLWAIT!
         if ('getVitoStatusFlamme' in data and 
@@ -382,6 +379,9 @@ class VitoMonitor():
                         printInfo("Mode MVOID")
 
     def processIncreasedNiveauMode(self, data):
+        """ The heating niveau is increased, wait the configured number of cycles and
+            then decrease the heating niveau again.
+        """
         # Take into account that the flame could die
         # in the meantime -> check flame status and switch back to MFLWAIT!
         resetniveau = False
@@ -407,6 +407,9 @@ class VitoMonitor():
                 printInfo("Mode MVOID")
 
     def processHeatingMode(self, mode, data):
+        """ Wait until the final temperature is reached and the
+            flame was switched off again.
+        """
         # Check flame status, wait until off
         if ('getVitoStatusFlamme' in data and 
             data['getVitoStatusFlamme'] == "aus"):
